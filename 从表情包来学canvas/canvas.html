@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <canvas id="canvas" width="800" height="800"></canvas>
+</body>
+<script src="https://cdn.bootcdn.net/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+<script>
+  const canvasWidth = 800, canvasHeight = 800
+  const canvas = document.getElementById('canvas')
+  const ctx = canvas.getContext('2d')
+  const graphics = []
+  class Display {
+    options = {}
+    constructor(options) {
+      this.options.x = 0
+      this.options.y = 0 
+      this.options.scareX = 1
+      this.options.scareY = 1
+      Object.assign(this.options, options)
+    }
+    show() {
+      this.options.show = true
+    }
+  }
+
+  class Face extends Display {
+    constructor(options) {
+      super(options)
+    }
+    draw() {
+      const { x, y, r } = this.options
+      ctx.save()
+      ctx.translate(x, y)
+      ctx.arc(0,0, r, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+      const radialGradient = ctx.createRadialGradient( -1 * r / 3,  - 1 * r / 3, 4 * r / 5 ,  -1 * r / 3,  -1 * r / 3 , r)
+      radialGradient.addColorStop(0, 'rgb(255,255,0)')
+      radialGradient.addColorStop(1, 'rgb(255,215,0)')
+      ctx.fillStyle = radialGradient
+      ctx.fill()
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  class Eye extends Display {
+    constructor(options) {
+      super(options)
+    }
+
+    draw() {
+      const radius = 4
+      const width = 20
+      const height = 12
+      ctx.save()
+      ctx.translate(this.options.x ,this.options.y)
+      ctx.strokeStyle = this.options.color
+      ctx.fillStyle = '#fff'
+      ctx.beginPath();
+      ctx.moveTo(0 + radius, 0)
+      ctx.lineTo(width - radius, 0)
+      ctx.quadraticCurveTo(width ,0, width,  0 + radius)
+      ctx.lineTo(width, height -radius)
+      ctx.quadraticCurveTo(width, height, width - radius, height)
+      ctx.lineTo(0 + radius, height)
+      ctx.quadraticCurveTo(0, height, 0, height -radius)
+      ctx.lineTo(0, 0 + radius)
+      ctx.quadraticCurveTo(0, 0, 0 + radius, 0)
+      ctx.closePath()
+      ctx.fill()
+      ctx.stroke();
+      ctx.restore()
+
+      ctx.save()
+      ctx.fillStyle = 'black'
+      ctx.translate(this.options.x ,this.options.y)
+      ctx.beginPath()
+      ctx.arc(width / 2, height / 2, 3, 0, Math.PI * 2)
+      ctx.stroke()
+      ctx.fill()
+      ctx.restore()
+    }
+  }
+
+  class Mouth extends Display {
+    constructor(options) {
+      super(options)
+    }
+    draw() {
+      const size = 40
+      const height = 10
+      ctx.save()
+      ctx.translate(this.options.x, this.options.y)
+      ctx.beginPath()
+      ctx.moveTo(0, 0)
+      ctx.quadraticCurveTo(size / 2, height, size, 0)
+      ctx.stroke()
+      ctx.restore()
+    }
+  }
+
+  class Tear extends Display{
+    constructor(options) {
+      super(options)
+    }
+
+    draw() {
+      const { width , height, radius } = this.options
+      ctx.save()
+      const gradient = ctx.createLinearGradient(0, 0 , width, height)
+      gradient.addColorStop(0, 'rgba(0,191,255,1)')
+      gradient.addColorStop(1, 'rgba(135,206,250,1)')
+      ctx.fillStyle = gradient
+      ctx.translate(this.options.x, this.options.y)
+      ctx.scale(this.options.scareX, this.options.scareY)
+      ctx.beginPath()
+      ctx.moveTo(0, 0)
+      ctx.lineTo(width, 0)
+      ctx.lineTo(width, height - radius)
+      ctx.quadraticCurveTo(width, height, width - radius, height)
+      ctx.lineTo(0 + radius, height)
+      ctx.quadraticCurveTo(0, height, 0, height -radius)
+      ctx.lineTo(0, 0)
+      ctx.closePath()
+      ctx.fill()
+      ctx.stroke()
+      ctx.restore()
+    }
+  }
+
+  function clear() {
+    ctx.beginPath()
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+  }
+
+  function render() {
+    clear()
+    graphics.forEach(graphic => {
+      graphic.draw()
+    })
+  }
+
+
+  let face = new Face({
+    x: 100,
+    y: 100,
+    r: 50
+  })
+
+  const eye1 = new Eye({
+    x: 50,
+    y: 80,
+  })
+
+  const eye2 = new Eye({
+    x: 90,
+    y: 80,
+  })
+
+  const tearDefault = {
+    width: 6,
+    height: 20,
+    radius: 4,
+    scareY: 0.3
+  }
+  const tear1 = new Tear({
+    x: 57,
+    y: 92,
+    ...tearDefault
+  })
+
+  const tear2 = new Tear({
+    x: 98,
+    y: 92,
+    ...tearDefault
+  })
+
+  const mouth = new Mouth({
+    x: 60,
+    y: 118
+  })
+
+  graphics.push(face)
+  graphics.push(eye1)
+  graphics.push(eye2)
+  graphics.push(mouth)
+  graphics.push(tear1)
+  graphics.push(tear2)
+  const animate = function() {
+    requestAnimationFrame(animate)
+    render()
+    TWEEN.update()
+  }
+  const tearTween1 = new TWEEN.Tween(tear1.options).to({scareY: 1}, 1500).easing(TWEEN.Easing.Quadratic.Out).start()
+  const tearTween2 = new TWEEN.Tween(tear2.options).to({scareY: 1}, 1500).easing(TWEEN.Easing.Quadratic.Out).start()
+  animate()
+</script>
+</html>
