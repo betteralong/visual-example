@@ -17,5 +17,5 @@ export const PLAYER_OPTIONS = {
   scale: 0.3,
   width: 356,
   height: 220,
-  speed: 4
+  speed: 3
 }
