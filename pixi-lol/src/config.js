@@ -19,3 +19,8 @@ export const PLAYER_OPTIONS = {
   height: 220,
   speed: 3
 }
+
+export const MONSTER_OPTIONS = {
+  number: 1, // 每次生产数量
+  time: 800 // 每次生产时间
+}

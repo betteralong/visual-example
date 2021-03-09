@@ -24,6 +24,5 @@ export function getButton(text) {
       message.style.fill = 'black'
     })
   }
-  
   return button
 }

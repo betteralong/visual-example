@@ -1,6 +1,6 @@
 import { Container, Graphics, Rectangle, Sprite, Text, filters, SCALE_MODES } from 'pixi.js'
 import { Tween, Easing } from '@tweenjs/tween.js'
-import { WIDTH, HEIGHT, IMAGES } from './config'
+import { WIDTH, HEIGHT, IMAGES, MONSTER_OPTIONS } from './config'
 import { appFactory } from './app'
 import { playerFactory, monsterFactory} from './factory'
 import { getButton } from './button'
@@ -13,14 +13,23 @@ function setup() {
   initScene()
   app.ticker.add(() => {
     if (currentScene === 'play') {
+      for(let i = 0; i < playScene.children.length; i++) {
+        let c = playScene.children[i]
+        if (c.name !== 'yaoji' && c.name !== 'map') {
+          if(hit(yaoji, c)) { // 碰撞检测
+            changeScene('over')
+            return
+          }
+        }
+      }
       scoreText.text  = `${++score}`  // 更新得分
       yaoji.walk()
       playScene.children.forEach(c => {
         if (c.name !== 'yaoji' && c.name !== 'map') {
           c.walk()
-          if(hit(yaoji, c)) { // 碰撞检测
-            changeScene('over')
-          }
+          // if(hit(yaoji, c)) { // 碰撞检测
+          //   changeScene('over')
+          // }
         }
       })
     }
@@ -105,7 +114,7 @@ function initScene() {
   yaoji.name = 'yaoji'
   playScene.addChild(yaoji)
   playScene.interactive = true;
-  playScene.on("click", (e) => {
+  playScene.on("rightclick", (e) => {
     const { x ,y } = e.data.global
     yaoji.goto(x, y)
   })
@@ -149,7 +158,7 @@ function changeScene(sceneName) {
         scoreText.visible = true
         score = 0
         yaoji.reset()
-        timer = monsterFactory(playScene, yaoji, 1, 800)
+        timer = monsterFactory(playScene, yaoji, MONSTER_OPTIONS.number, MONSTER_OPTIONS.time)
       } else {
         if (timer) {
           clearInterval(timer)
